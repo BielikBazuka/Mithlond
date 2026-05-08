@@ -3,42 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASML Label Printer · Altec ATP-600 Pro</title>
+<title>ASML Label Printer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/*
-  Physical label: small landscape sticker ~50×25mm
-  Driver stock: 101.6×152.4mm roll (gap sensor cuts per label)
-  @page must match DRIVER stock size — the printer firmware
-  handles the cut. So @page = 101.6×152.4mm portrait.
-  The label CONTENT is laid out landscape within that page.
 
-  Actually — the browser sends one page per label to the driver.
-  The driver stock size is the maximum media. The gap sensor
-  fires at the physical label boundary. So we set @page to the
-  PHYSICAL LABEL size, not the roll size.
-  Physical label from photo: landscape ~75mm × 30mm (estimated).
-  We use 76.2mm × 25.4mm (3"×1") which is a standard small label
-  and matches the aspect ratio in the photo perfectly.
-*/
-
+/* ─── TOKENS ─────────────────────────────── */
 :root {
   --navy:   #0F238C;
-  --navy-h: #142fa8;
   --blue:   #1297E4;
   --yellow: #EAE136;
-  --surface:#f2f5fb;
+  --bg:     #f0f3fa;
+  --card:   #ffffff;
   --border: #dce3f0;
   --text:   #0d1a3a;
-  --muted:  #5a6a8a;
-  --pale:   #daeef9;
+  --muted:  #6b7a99;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--surface);
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   display: flex;
@@ -46,476 +31,452 @@ body {
   align-items: center;
 }
 
-/* ── Header ── */
+/* ─── HEADER ─────────────────────────────── */
 .hdr {
   width: 100%;
   background: var(--navy);
-  height: 56px;
-  padding: 0 28px;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 2px 16px rgba(15,35,140,.3);
-  flex-shrink: 0;
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(15,35,140,.35);
 }
-.hdr-left { display: flex; align-items: center; gap: 14px; }
-.hdr-logo { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
-.hdr-logo span { color: var(--yellow); }
+.hdr-logo { font-size: 24px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+.hdr-logo b { color: var(--yellow); font-weight: 800; }
 .hdr-pill {
   background: var(--yellow); color: var(--navy);
-  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; padding: 3px 9px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 4px;
 }
-.hdr-right {
-  font-size: 11px; font-weight: 400; letter-spacing: 2px;
-  text-transform: uppercase; color: rgba(255,255,255,.4);
-}
-.grad-bar {
-  width: 100%; height: 3px; flex-shrink: 0;
-  background: linear-gradient(90deg, var(--yellow), var(--blue) 55%, var(--navy));
-}
+.hdr-sub { font-size: 11px; color: rgba(255,255,255,.4); letter-spacing: 2px; text-transform: uppercase; }
+.hdr-right { display: flex; align-items: center; gap: 16px; }
 
-/* ── Layout ── */
-.main {
-  width: 100%; max-width: 980px;
-  padding: 28px 24px 64px;
-  display: grid;
-  grid-template-columns: 310px 1fr;
+.accent { width: 100%; height: 3px; background: linear-gradient(90deg, var(--yellow), var(--blue) 50%, var(--navy)); }
+
+/* ─── LAYOUT ─────────────────────────────── */
+.wrap {
+  width: 100%;
+  max-width: 960px;
+  padding: 32px 20px 60px;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
-  align-items: start;
 }
 
-/* ── Card ── */
+/* ─── CARD ───────────────────────────────── */
 .card {
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px;
-  box-shadow: 0 1px 4px rgba(15,35,140,.05), 0 4px 18px rgba(15,35,140,.05);
+  box-shadow: 0 2px 12px rgba(15,35,140,.06);
 }
-.card-title {
+.card-hd {
   font-size: 10px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; color: var(--navy);
   border-bottom: 2px solid var(--yellow);
-  padding-bottom: 9px; margin-bottom: 20px;
-  display: flex; align-items: center; gap: 7px;
+  padding-bottom: 10px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
 }
-.card-title svg { width: 13px; height: 13px; flex-shrink: 0; }
+.card-hd svg { width: 13px; height: 13px; }
 
-.field { margin-bottom: 14px; }
+/* ─── FORM ROW ───────────────────────────── */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
 .field label {
   display: block; font-size: 10px; font-weight: 600;
   letter-spacing: 1px; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 5px;
+  color: var(--muted); margin-bottom: 6px;
 }
-.field input[type="date"],
-.field input[type="time"] {
+.field input {
   width: 100%;
-  border: 1.5px solid var(--border); border-radius: 6px;
-  padding: 10px 13px;
-  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 11px 14px;
+  font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500;
   color: var(--text); background: #fff; outline: none;
-  transition: border-color .18s, box-shadow .18s;
+  transition: border-color .15s, box-shadow .15s;
   appearance: none; -webkit-appearance: none;
 }
 .field input:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(18,151,228,.12);
+  box-shadow: 0 0 0 3px rgba(18,151,228,.14);
 }
-.field input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .5; }
+.field input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .45; }
 
-.qty-wrap {
-  display: flex; border: 1.5px solid var(--border);
-  border-radius: 6px; overflow: hidden;
-}
+/* Qty */
+.qty-wrap { display: flex; border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; }
 .qty-btn {
-  width: 42px; height: 42px; border: none;
-  background: var(--surface); color: var(--navy);
-  font-size: 20px; font-weight: 600; cursor: pointer;
-  transition: background .15s;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; user-select: none;
+  width: 44px; height: 44px; border: none; background: var(--bg);
+  color: var(--navy); font-size: 22px; font-weight: 500;
+  cursor: pointer; transition: background .12s;
+  display: flex; align-items: center; justify-content: center; user-select: none;
 }
-.qty-btn:hover  { background: var(--pale); }
-.qty-btn:active { background: #b6ddf7; }
+.qty-btn:hover { background: #daeef9; }
 .qty-num {
-  flex: 1; text-align: center;
-  font-size: 18px; font-weight: 700; color: var(--navy);
-  border: none;
-  border-left: 1.5px solid var(--border);
-  border-right: 1.5px solid var(--border);
-  outline: none; padding: 8px 0;
-  font-family: 'Inter', sans-serif; background: #fff;
+  width: 52px; text-align: center; font-size: 18px; font-weight: 700; color: var(--navy);
+  border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border);
+  outline: none; padding: 0; font-family: inherit; background: #fff;
 }
-.qty-num::-webkit-outer-spin-button,
-.qty-num::-webkit-inner-spin-button { -webkit-appearance: none; }
+.qty-num::-webkit-inner-spin-button,
+.qty-num::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-.printer-chip {
-  margin-top: 14px; padding: 10px 13px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; font-size: 11px; color: var(--muted);
-  display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
-}
-.printer-chip svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--navy); margin-top: 1px; }
-.printer-chip strong { color: var(--navy); }
-
+/* Print button */
 .print-btn {
-  width: 100%; margin-top: 12px; padding: 13px 20px;
-  background: var(--navy); color: #fff; border: none; border-radius: 6px;
-  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
-  letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  box-shadow: 0 2px 8px rgba(15,35,140,.22);
-  transition: background .18s, transform .1s, box-shadow .18s;
+  width: 100%; margin-top: 16px; padding: 14px;
+  background: var(--navy); color: #fff; border: none; border-radius: 8px;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background .15s, transform .1s;
   position: relative; overflow: hidden;
 }
 .print-btn::after {
-  content: ''; position: absolute; left: 0; bottom: 0;
+  content: ''; position: absolute; bottom: 0; left: 0;
   width: 100%; height: 3px; background: var(--yellow);
-  transform: scaleX(0); transform-origin: left; transition: transform .25s;
+  transform: scaleX(0); transform-origin: left; transition: transform .2s;
 }
-.print-btn:hover { background: var(--navy-h); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(15,35,140,.3); }
+.print-btn:hover { background: #142fa8; transform: translateY(-1px); }
 .print-btn:hover::after { transform: scaleX(1); }
-.print-btn:active { transform: translateY(0); }
-.print-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.print-btn:active { transform: none; }
+.print-btn svg { width: 16px; height: 16px; }
 
-/* ── Preview card ── */
-.prev-card {
-  background: #fff; border: 1px solid var(--border); border-radius: 14px;
-  padding: 24px;
-  box-shadow: 0 1px 4px rgba(15,35,140,.05), 0 4px 18px rgba(15,35,140,.05);
-  display: flex; flex-direction: column;
+/* Printer info */
+.pinfo {
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  font-size: 11px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
 }
-.prev-card .card-title { color: var(--blue); border-bottom-color: var(--blue); }
-.prev-bg {
-  background: #e6eaf4;
-  background-image: radial-gradient(circle, #c8cfdf 1px, transparent 1px);
-  background-size: 12px 12px;
+.pinfo svg { width: 13px; height: 13px; color: var(--navy); flex-shrink: 0; }
+.pinfo strong { color: var(--navy); }
+
+/* ─── PREVIEW SECTION ────────────────────── */
+.prev-hd {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--blue);
+  border-bottom: 2px solid var(--blue);
+  padding-bottom: 10px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.prev-hd svg { width: 13px; height: 13px; }
+
+/* Preview container — fills card width, fixed height, hard clip */
+.prev-wrap {
+  background: #e2e8f5;
+  background-image: radial-gradient(#c5cedf 1px, transparent 1px);
+  background-size: 14px 14px;
   border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  min-height: 220px; padding: 32px;
+  padding: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /*
-  SCREEN PREVIEW
-  Physical label: 76.2mm × 25.4mm landscape
-  At 96dpi: 76.2mm=288px, 25.4mm=96px
-  Scale up 2.2× for readability.
+  Label: fills the container width, aspect-ratio 3:1 (76.2÷25.4).
+  No fixed pixel widths — fully responsive.
+  No transforms. Overflow hidden clips the barcode SVG.
 */
-.label {
-  width: 288px;
-  height: 96px;
-  transform: scale(2.2);
-  transform-origin: center center;
-  margin: 58px 0;
+.slabel {
+  width: 100%;
+  aspect-ratio: 3 / 1;
   background: #fff;
-  border-radius: 3px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.15), 0 6px 24px rgba(15,35,140,.2);
-  display: flex;
-  flex-direction: row;   /* landscape: left stripe | content */
-  overflow: hidden;
-  position: relative;
-}
-
-/* Left colour stripe (vertical, since landscape) */
-.lbl-stripe {
-  width: 5px; flex-shrink: 0;
-  background: linear-gradient(180deg, var(--navy) 0%, var(--blue) 65%, var(--yellow) 100%);
-  print-color-adjust: exact; -webkit-print-color-adjust: exact;
-}
-
-/* Main content area */
-.lbl-content {
-  flex: 1;
+  border-radius: 4px;
+  box-shadow: 0 3px 16px rgba(0,0,0,.18);
   display: flex;
   flex-direction: column;
-  padding: 4px 5px 3px;
-  min-width: 0;
+  overflow: hidden;
 }
 
-/* Top row: ASML brand + barcode format hint */
-.lbl-top {
+/* Navy header — proportional height */
+.sl-hdr {
+  flex: 0 0 23%;
+  background: var(--navy);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
-  margin-bottom: 1px;
+  padding: 0 3%;
 }
-.lbl-brand {
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 5.5px; font-weight: 800; letter-spacing: 0.5px;
-  color: var(--navy);
-  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+.sl-logo {
+  font-size: clamp(10px, 2.5vw, 18px);
+  font-weight: 800; color: #fff; letter-spacing: -0.5px; line-height: 1;
 }
-.lbl-brand span { color: var(--blue); }
-.lbl-hint {
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 3.5px; font-weight: 500; letter-spacing: 0.3px;
-  color: #aab; line-height: 1;
+.sl-logo b { color: var(--yellow); }
+.sl-sub {
+  font-size: clamp(6px, 1vw, 9px);
+  font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: rgba(255,255,255,.55);
 }
 
-/* The two barcode rows — each takes equal height */
-.lbl-rows {
+/* Body: date at top, time at bottom, max separation */
+.sl-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  justify-content: space-between;
+  padding: 3% 3%;
   min-height: 0;
 }
 
-.lbl-row {
-  flex: 1;
+/* Each row identical — takes natural equal space */
+.sl-row {
+  flex: 0 0 auto;
+  height: 36%;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 2px;
-  min-height: 0;
+  gap: 2%;
+  min-width: 0;
   overflow: hidden;
 }
 
-.lbl-sep {
-  height: 0.4px;
-  background: #dde3f0;
-  margin: 0;
-  flex-shrink: 0;
+.sl-tag {
+  font-size: clamp(7px, 1.2vw, 11px);
+  font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #999;
+  flex: 0 0 9%;
+  line-height: 1;
 }
 
-.lbl-tag {
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 4.5px; font-weight: 700; letter-spacing: 0.5px;
-  text-transform: uppercase; color: var(--muted);
-  width: 14px; flex-shrink: 0; line-height: 1;
-  print-color-adjust: exact; -webkit-print-color-adjust: exact;
-}
-
-.lbl-bc-wrap {
+/* Barcode: takes most of the row, clips cleanly */
+.sl-bc {
   flex: 1;
-  display: flex; align-items: center;
-  min-width: 0; height: 100%; overflow: hidden;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.sl-bc svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
 }
 
-/* KEY: both SVGs identical fixed dimensions */
-.lbl-bc-wrap svg {
-  width: 190px !important;
-  height: 30px !important;
-  display: block; flex-shrink: 0;
-}
-
-.lbl-val {
-  font-family: 'Inter', Arial, sans-serif;
-  font-size: 4.5px; font-weight: 700; color: var(--text);
+/* Value: fixed percentage width so it always shows */
+.sl-val {
+  flex: 0 0 22%;
+  text-align: right;
+  font-size: clamp(8px, 1.4vw, 13px);
+  font-weight: 800;
+  color: #000;
   letter-spacing: 0.3px;
-  width: 42px; text-align: right; flex-shrink: 0; line-height: 1;
-}
-
-/* ── Toast ── */
-.toast {
-  position: fixed; bottom: 26px; left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: var(--navy); color: #fff;
-  padding: 11px 20px; border-radius: 8px;
-  font-size: 13px; font-weight: 500;
-  display: flex; align-items: center; gap: 9px;
-  box-shadow: 0 4px 20px rgba(15,35,140,.35);
-  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-  z-index: 999; border-bottom: 3px solid var(--yellow);
+  line-height: 1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.toast.show { transform: translateX(-50%) translateY(0); }
 
-.info-row {
-  margin-top: 14px; display: flex;
-  justify-content: space-between; align-items: center;
+.prev-meta {
+  margin-top: 12px;
+  display: flex; justify-content: space-between;
   font-size: 11px; color: var(--muted);
 }
-.info-row strong { color: var(--navy); }
+.prev-meta strong { color: var(--navy); }
 
-/* ══════════════════════════════════════════════
-   PRINT STYLESHEET
+/* ─── TOAST ──────────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--navy); color: #fff;
+  padding: 12px 22px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(15,35,140,.4);
+  border-bottom: 3px solid var(--yellow);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999; white-space: nowrap;
+}
+.toast.up { transform: translateX(-50%) translateY(0); }
 
-   The driver stock is 101.6×152.4mm (the roll).
-   The physical label cut by the gap sensor is
-   approx 76.2×25.4mm landscape.
+/* ─── PRINT AREA (hidden on screen) ─────── */
+#pa { display: none; }
 
-   We tell the browser: @page = physical label size.
-   The Altec driver + gap sensor handles the cut.
-   Content fills the label edge to edge.
-══════════════════════════════════════════════ */
-#print-area { display: none; }
-
+/* ══════════════════════════════════════════
+   PRINT CSS
+   Target: Altec ATP-600 Pro, 600dpi
+   Driver stock: 101.6 × 152.4mm
+   Physical label (from photo): landscape ~76×25mm
+   We send one page per label at @page 76.2×25.4mm.
+   All colours stripped — thermal = black only.
+   No gradients, no coloured backgrounds.
+   ASML logo = bold black text.
+══════════════════════════════════════════ */
 @media print {
+
   @page {
-    margin: 0;
     size: 76.2mm 25.4mm landscape;
+    margin: 0;
   }
 
   html, body {
     margin: 0; padding: 0;
     width: 76.2mm; height: 25.4mm;
     background: #fff;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
-  body > *:not(#print-area) { display: none !important; }
-  #print-area { display: block !important; }
+  body > *:not(#pa) { display: none !important; }
+  #pa { display: block !important; }
 
-  #print-area .pl {
+  /* One label per page */
+  .pl {
     width: 76.2mm;
     height: 25.4mm;
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
     background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     page-break-after: always;
     page-break-inside: avoid;
   }
-  #print-area .pl:last-child { page-break-after: auto; }
+  .pl:last-child { page-break-after: auto; }
 
-  /* Left vertical stripe */
-  #print-area .pl-stripe {
-    width: 2mm; flex-shrink: 0;
-    background: linear-gradient(180deg, #0F238C 0%, #1297E4 65%, #EAE136 100%) !important;
-    print-color-adjust: exact; -webkit-print-color-adjust: exact;
-  }
-
-  /* Content */
-  #print-area .pl-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 1.2mm 2mm 1mm;
-    min-width: 0;
-  }
-
-  /* Top brand row */
-  #print-area .pl-top {
+  /* ASML header — black box, white text */
+  .pl-hdr {
+    height: 6mm;
+    background: #000 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-shrink: 0;
-    margin-bottom: 0.5mm;
-  }
-  #print-area .pl-brand {
-    font-family: 'Inter', Arial, sans-serif;
-    font-size: 6pt; font-weight: 800; letter-spacing: 0.5px;
-    color: #0F238C;
-    print-color-adjust: exact; -webkit-print-color-adjust: exact;
-  }
-  #print-area .pl-brand span {
-    color: #1297E4;
-    print-color-adjust: exact; -webkit-print-color-adjust: exact;
-  }
-  #print-area .pl-hint {
-    font-family: 'Inter', Arial, sans-serif;
-    font-size: 4pt; font-weight: 500; color: #aab; letter-spacing: 0.3px;
-  }
-
-  /* Barcode rows */
-  #print-area .pl-rows {
-    flex: 1; display: flex; flex-direction: column;
-    gap: 0; min-height: 0;
-  }
-
-  #print-area .pl-row {
-    flex: 1; display: flex; flex-direction: row;
-    align-items: center; gap: 1mm;
-    min-height: 0; overflow: hidden;
-  }
-
-  #print-area .pl-sep {
-    height: 0.15mm; background: #dde3f0;
+    padding: 0 2.5mm;
     flex-shrink: 0;
   }
+  .pl-logo {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 9pt; font-weight: 800; color: #fff !important;
+    letter-spacing: -0.3px; line-height: 1;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  .pl-sub {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 4.5pt; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; color: #bbb !important;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
 
-  #print-area .pl-tag {
+  /* Body: date at top, time at bottom */
+  .pl-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0.8mm 2.5mm 0.8mm;
+  }
+
+  /* Each row: identical fixed height */
+  .pl-row {
+    height: 8.2mm;
+    display: flex;
+    align-items: center;
+    gap: 1.5mm;
+    overflow: hidden;
+  }
+
+  /* Tag label */
+  .pl-tag {
     font-family: 'Inter', Arial, sans-serif;
     font-size: 5pt; font-weight: 700; letter-spacing: 0.5px;
-    text-transform: uppercase; color: #5a6a8a;
-    width: 5mm; flex-shrink: 0; line-height: 1;
-    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+    text-transform: uppercase; color: #555;
+    width: 5.5mm; flex-shrink: 0; line-height: 1;
   }
 
-  #print-area .pl-bc {
-    flex: 1; display: flex; align-items: center;
-    min-width: 0; height: 100%; overflow: hidden;
+  /* Barcode area — fills remaining width */
+  .pl-bc {
+    flex: 1;
+    height: 7.5mm;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
   }
-
-  /* Both barcodes: identical 47mm × 8.5mm */
-  #print-area .pl-bc svg {
-    width: 47mm !important;
-    height: 8.5mm !important;
+  /* Both SVGs: same height, fill available width */
+  .pl-bc svg {
+    width: 100% !important;
+    height: 7.5mm !important;
     display: block;
   }
 
-  #print-area .pl-val {
+  /* Human-readable value — large and bold */
+  .pl-val {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 5pt; font-weight: 700; color: #0d1a3a;
-    letter-spacing: 0.5px;
-    width: 16mm; text-align: right; flex-shrink: 0; line-height: 1;
-    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+    font-size: 10pt; font-weight: 800; color: #000;
+    letter-spacing: 1px;
+    width: 18mm; flex-shrink: 0;
+    text-align: right; line-height: 1;
   }
 }
 
-@media (max-width: 760px) {
-  .main { grid-template-columns: 1fr; }
-  .label { transform: scale(1.5); margin: 24px 0; }
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr 1fr; }
+  .form-row .qty-field { grid-column: span 2; }
 }
+
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="hdr">
-  <div class="hdr-left">
-    <div class="hdr-logo">A<span>S</span>ML</div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="hdr-logo">A<b>S</b>ML</div>
     <div class="hdr-pill">Label Printer</div>
   </div>
-  <div class="hdr-right">Receiving &amp; Logistics</div>
+  <div class="hdr-right">
+    <div class="hdr-sub">Receiving &amp; Logistics</div>
+  </div>
 </div>
-<div class="grad-bar"></div>
+<div class="accent"></div>
 
-<div class="main">
+<div class="wrap">
 
-  <!-- Controls -->
+  <!-- Controls card -->
   <div class="card">
-    <div class="card-title">
+    <div class="card-hd">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <rect x="2" y="2" width="12" height="12" rx="1.5"/>
-        <line x1="5" y1="7" x2="5" y2="11"/>
-        <line x1="8" y1="5" x2="8" y2="11"/>
-        <line x1="11" y1="8" x2="11" y2="11"/>
+        <line x1="5" y1="7" x2="5" y2="11"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="11" y1="8" x2="11" y2="11"/>
       </svg>
       Configure Label
     </div>
 
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="inp-date">
-    </div>
-
-    <div class="field">
-      <label>Time</label>
-      <input type="time" id="inp-time">
-    </div>
-
-    <div class="field">
-      <label>Number of Copies</label>
-      <div class="qty-wrap">
-        <button class="qty-btn" id="btn-minus">−</button>
-        <input type="number" class="qty-num" id="inp-qty" value="1" min="1" max="99">
-        <button class="qty-btn" id="btn-plus">+</button>
+    <div class="form-row">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="iDate">
+      </div>
+      <div class="field">
+        <label>Time</label>
+        <input type="time" id="iTime">
+      </div>
+      <div class="field qty-field">
+        <label>Copies</label>
+        <div class="qty-wrap">
+          <button class="qty-btn" id="qMinus">−</button>
+          <input type="number" class="qty-num" id="iQty" value="1" min="1" max="99">
+          <button class="qty-btn" id="qPlus">+</button>
+        </div>
       </div>
     </div>
 
-    <div class="printer-chip">
+    <div class="pinfo">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="4,6 4,1 12,1 12,6"/>
         <path d="M4 11H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2"/>
         <rect x="4" y="10" width="8" height="5"/>
       </svg>
-      <span>
-        <strong>Altec ATP-600 Pro</strong> · 600 DPI<br>
-        Label: <strong>76.2 × 25.4 mm</strong> · Landscape · Gap
-      </span>
+      <span><strong>Altec ATP-600 Pro</strong> · 600 DPI · Thermal · Label: <strong>76.2 × 25.4 mm</strong> landscape</span>
     </div>
 
-    <button class="print-btn" id="btn-print">
+    <button class="print-btn" id="btnPrint">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="4,6 4,1 12,1 12,6"/>
         <path d="M4 11H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2"/>
@@ -525,178 +486,191 @@ body {
     </button>
   </div>
 
-  <!-- Preview -->
-  <div class="prev-card">
-    <div class="card-title">
+  <!-- Preview card -->
+  <div class="card">
+    <div class="prev-hd">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <rect x="1" y="1" width="14" height="14" rx="2"/>
-        <line x1="4" y1="6" x2="12" y2="6"/>
-        <line x1="4" y1="10" x2="10" y2="10"/>
+        <line x1="4" y1="5" x2="12" y2="5"/><line x1="4" y1="9" x2="10" y2="9"/><line x1="4" y1="13" x2="8" y2="13"/>
       </svg>
       Live Preview · 76.2 × 25.4 mm
     </div>
 
-    <div class="prev-bg">
-      <div class="label">
-        <div class="lbl-stripe"></div>
-        <div class="lbl-content">
-          <div class="lbl-top">
-            <div class="lbl-brand">A<span>S</span>ML</div>
-            <div class="lbl-hint">DDMMYYYY · HHMM</div>
+    <div class="prev-wrap">
+      <!-- Screen label: 480×130px, no transforms -->
+      <div class="slabel">
+        <div class="sl-hdr">
+          <div class="sl-logo">A<b>S</b>ML</div>
+          <div class="sl-sub">Receiving &amp; Logistics</div>
+        </div>
+        <div class="sl-body">
+          <div class="sl-row">
+            <div class="sl-tag">Date</div>
+            <div class="sl-bc"><svg id="bcDatePrev"></svg></div>
+            <div class="sl-val" id="vDate">—</div>
           </div>
-          <div class="lbl-rows">
-            <div class="lbl-row">
-              <div class="lbl-tag">Date</div>
-              <div class="lbl-bc-wrap"><svg id="bc-date-prev"></svg></div>
-              <div class="lbl-val" id="val-date">—</div>
-            </div>
-            <div class="lbl-sep"></div>
-            <div class="lbl-row">
-              <div class="lbl-tag">Time</div>
-              <div class="lbl-bc-wrap"><svg id="bc-time-prev"></svg></div>
-              <div class="lbl-val" id="val-time">—</div>
-            </div>
+          <div class="sl-row">
+            <div class="sl-tag">Time</div>
+            <div class="sl-bc"><svg id="bcTimePrev"></svg></div>
+            <div class="sl-val" id="vTime">—</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="info-row">
+    <div class="prev-meta">
       <span>Barcode: <strong>DDMMYYYY</strong> / <strong>HHMM</strong> · CODE128</span>
-      <span id="info-copies">Copies: <strong>1</strong></span>
+      <span id="metaCopies">Copies: <strong>1</strong></span>
     </div>
   </div>
 
-</div>
+</div><!-- /wrap -->
 
-<div id="print-area"></div>
+<!-- Print output -->
+<div id="pa"></div>
 
+<!-- Toast -->
 <div class="toast" id="toast">
-  <span id="toast-icon">✓</span>
-  <span id="toast-msg">Sent to printer</span>
+  <span id="toastIcon">✓</span>
+  <span id="toastMsg">Sent to printer</span>
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-const pad = n => String(n).padStart(2, '0');
+const g = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
 
-(function() {
+/* Set defaults to current date/time */
+(function(){
   const n = new Date();
-  $('inp-date').value = `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}`;
-  $('inp-time').value = `${pad(n.getHours())}:${pad(n.getMinutes())}`;
+  g('iDate').value = `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}`;
+  g('iTime').value = `${pad(n.getHours())}:${pad(n.getMinutes())}`;
 })();
 
-const bcDate   = iso => { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}${m}${y}`; };
-const dispDate = iso => { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}.${m}.${y}`; };
-const bcTime   = t   => t ? t.replace(':', '') : '';
-const dispTime = t   => t || '—';
+/* Format helpers */
+function fmtBcDate(iso){ // "YYYY-MM-DD" → "DDMMYYYY"
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return d+m+y;
+}
+function fmtDispDate(iso){ // "YYYY-MM-DD" → "DD.MM.YYYY"
+  if(!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+function fmtBcTime(t){ return t ? t.replace(':','') : ''; } // "HH:MM" → "HHMM"
+function fmtDispTime(t){ return t || '—'; }
 
-const BC = {
-  format: 'CODE128',
-  width: 1.8,
-  height: 32,
-  displayValue: false,
-  margin: 2,
-  lineColor: '#0d1a3a',
-  background: '#ffffff',
+/* Barcode options — identical for both so they render same size */
+const BCOPTS = {
+  format:'CODE128', width:2, height:60,
+  displayValue:false, margin:2,
+  lineColor:'#000', background:'#fff'
 };
 
-function renderBC(el, value) {
-  if (!value) { el.innerHTML = ''; return; }
+function drawBC(el, val){
+  if(!val){ el.innerHTML=''; return; }
   try {
-    JsBarcode(el, value, BC);
+    JsBarcode(el, val, BCOPTS);
+    /* Strip auto width/height — CSS controls display size */
     el.removeAttribute('width');
     el.removeAttribute('height');
-  } catch(e) { el.innerHTML = ''; }
+  } catch(e){ el.innerHTML=''; }
 }
 
-const clampQty = () => {
-  const v = Math.max(1, Math.min(99, parseInt($('inp-qty').value) || 1));
-  $('inp-qty').value = v; return v;
-};
+/* Qty controls */
+function clamp(){
+  let v = parseInt(g('iQty').value)||1;
+  v = Math.max(1, Math.min(99, v));
+  g('iQty').value = v;
+  return v;
+}
+g('qMinus').onclick = () => { g('iQty').value = Math.max(1,(parseInt(g('iQty').value)||1)-1); update(); };
+g('qPlus').onclick  = () => { g('iQty').value = Math.min(99,(parseInt(g('iQty').value)||1)+1); update(); };
 
-$('btn-minus').addEventListener('click', () => {
-  const v = parseInt($('inp-qty').value)||1; if(v>1){$('inp-qty').value=v-1;refresh();}
-});
-$('btn-plus').addEventListener('click', () => {
-  const v = parseInt($('inp-qty').value)||1; if(v<99){$('inp-qty').value=v+1;refresh();}
-});
+/* Update preview */
+function update(){
+  const d = g('iDate').value;
+  const t = g('iTime').value;
+  const qty = clamp();
 
-function refresh() {
-  const d = $('inp-date').value, t = $('inp-time').value;
-  renderBC($('bc-date-prev'), bcDate(d) || '01012025');
-  renderBC($('bc-time-prev'), bcTime(t) || '0800');
-  $('val-date').textContent = dispDate(d);
-  $('val-time').textContent = dispTime(t);
-  $('info-copies').innerHTML = `Copies: <strong>${clampQty()}</strong>`;
+  drawBC(g('bcDatePrev'), fmtBcDate(d) || '01012025');
+  drawBC(g('bcTimePrev'), fmtBcTime(t) || '0800');
+
+  g('vDate').textContent = fmtDispDate(d);
+  g('vTime').textContent = fmtDispTime(t);
+  g('metaCopies').innerHTML = `Copies: <strong>${qty}</strong>`;
 }
 
-['input','change'].forEach(ev => {
-  ['inp-date','inp-time','inp-qty'].forEach(id => $(id).addEventListener(ev, refresh));
+['iDate','iTime','iQty'].forEach(id => {
+  g(id).addEventListener('input', update);
+  g(id).addEventListener('change', update);
 });
 
-function buildPrintArea() {
-  const d = $('inp-date').value, t = $('inp-time').value;
-  const qty = clampQty();
-  const bcd = bcDate(d), bct = bcTime(t);
-  const dd = dispDate(d), dt = dispTime(t);
+/* Build print DOM */
+function buildPrint(){
+  const d = g('iDate').value;
+  const t = g('iTime').value;
+  const qty = clamp();
+  const bcd = fmtBcDate(d);
+  const bct = fmtBcTime(t);
+  const dd  = fmtDispDate(d);
+  const dt  = fmtDispTime(t);
 
-  const area = $('print-area');
-  area.innerHTML = '';
+  const pa = g('pa');
+  pa.innerHTML = '';
 
-  for (let i = 0; i < qty; i++) {
+  for(let i=0; i<qty; i++){
     const el = document.createElement('div');
     el.className = 'pl';
     el.innerHTML = `
-      <div class="pl-stripe"></div>
-      <div class="pl-content">
-        <div class="pl-top">
-          <div class="pl-brand">A<span>S</span>ML</div>
-          <div class="pl-hint">DDMMYYYY · HHMM</div>
+      <div class="pl-hdr">
+        <div class="pl-logo">ASML</div>
+        <div class="pl-sub">Receiving &amp; Logistics</div>
+      </div>
+      <div class="pl-body">
+        <div class="pl-row">
+          <div class="pl-tag">Date</div>
+          <div class="pl-bc"><svg id="pd${i}"></svg></div>
+          <div class="pl-val">${dd}</div>
         </div>
-        <div class="pl-rows">
-          <div class="pl-row">
-            <div class="pl-tag">Date</div>
-            <div class="pl-bc"><svg id="p-d-${i}"></svg></div>
-            <div class="pl-val">${dd}</div>
-          </div>
-          <div class="pl-sep"></div>
-          <div class="pl-row">
-            <div class="pl-tag">Time</div>
-            <div class="pl-bc"><svg id="p-t-${i}"></svg></div>
-            <div class="pl-val">${dt}</div>
-          </div>
+        <div class="pl-row">
+          <div class="pl-tag">Time</div>
+          <div class="pl-bc"><svg id="pt${i}"></svg></div>
+          <div class="pl-val">${dt}</div>
         </div>
       </div>
     `;
-    area.appendChild(el);
-    if (bcd) renderBC(el.querySelector(`#p-d-${i}`), bcd);
-    if (bct) renderBC(el.querySelector(`#p-t-${i}`), bct);
+    pa.appendChild(el);
+    if(bcd) drawBC(el.querySelector(`#pd${i}`), bcd);
+    if(bct) drawBC(el.querySelector(`#pt${i}`), bct);
   }
 }
 
-function showToast(msg, ok = true) {
-  $('toast-icon').textContent = ok ? '✓' : '⚠';
-  $('toast-msg').textContent = msg;
-  $('toast').classList.add('show');
-  setTimeout(() => $('toast').classList.remove('show'), 3000);
+/* Toast */
+function toast(msg, ok=true){
+  g('toastIcon').textContent = ok ? '✓' : '⚠';
+  g('toastMsg').textContent  = msg;
+  const t = g('toast');
+  t.classList.add('up');
+  setTimeout(()=>t.classList.remove('up'), 3000);
 }
 
-$('btn-print').addEventListener('click', () => {
-  if (!$('inp-date').value || !$('inp-time').value) {
-    showToast('Fill in date and time first', false); return;
+/* Print */
+g('btnPrint').addEventListener('click', ()=>{
+  if(!g('iDate').value || !g('iTime').value){
+    toast('Please fill in date and time', false); return;
   }
-  const qty = clampQty();
-  buildPrintArea();
-  setTimeout(() => {
+  const qty = clamp();
+  buildPrint();
+  setTimeout(()=>{
     window.print();
-    showToast(`${qty} label${qty > 1 ? 's' : ''} sent to printer`);
+    toast(`${qty} label${qty>1?'s':''} sent to printer`);
   }, 150);
 });
 
-window.addEventListener('afterprint', () => { $('print-area').innerHTML = ''; });
+window.addEventListener('afterprint', ()=>{ g('pa').innerHTML=''; });
 
-refresh();
+update();
 </script>
 </body>
 </html>

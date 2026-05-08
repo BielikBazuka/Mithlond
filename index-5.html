@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASML Label Printer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0F238C;
+  --navy-h:  #142fa8;
+  --blue:    #1297E4;
+  --yellow:  #EAE136;
+  --surface: #f2f5fb;
+  --border:  #dce3f0;
+  --text:    #0d1a3a;
+  --muted:   #5a6a8a;
+  --pale:    #daeef9;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--surface);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Header ── */
+.hdr {
+  width: 100%;
+  background: var(--navy);
+  height: 58px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 16px rgba(15,35,140,.3);
+}
+.hdr-left { display: flex; align-items: center; gap: 14px; }
+.hdr-logo  { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; line-height: 1; }
+.hdr-logo span { color: var(--yellow); }
+.hdr-pill  {
+  background: var(--yellow); color: var(--navy);
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 4px;
+}
+.hdr-right {
+  font-size: 11px; font-weight: 400; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,.4);
+}
+.grad-bar {
+  width: 100%; height: 3px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--yellow), var(--blue) 55%, var(--navy));
+}
+
+/* ── Layout ── */
+.main {
+  width: 100%; max-width: 980px;
+  padding: 32px 24px 64px;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+
+/* ── Card ── */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 1px 4px rgba(15,35,140,.05), 0 4px 18px rgba(15,35,140,.05);
+}
+.card-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--navy);
+  border-bottom: 2px solid var(--yellow);
+  padding-bottom: 10px; margin-bottom: 22px;
+  display: flex; align-items: center; gap: 7px;
+}
+.card-title svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* ── Fields ── */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+.field input[type="date"],
+.field input[type="time"] {
+  width: 100%;
+  border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 10px 13px;
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500;
+  color: var(--text); background: #fff; outline: none;
+  transition: border-color .18s, box-shadow .18s;
+  appearance: none; -webkit-appearance: none;
+}
+.field input[type="date"]:focus,
+.field input[type="time"]:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(18,151,228,.12);
+}
+.field input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: .5; }
+
+/* ── Quantity ── */
+.qty-wrap {
+  display: flex; border: 1.5px solid var(--border);
+  border-radius: 6px; overflow: hidden;
+}
+.qty-btn {
+  width: 42px; height: 42px; border: none;
+  background: var(--surface); color: var(--navy);
+  font-size: 20px; font-weight: 600; cursor: pointer;
+  transition: background .15s;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; user-select: none; line-height: 1;
+}
+.qty-btn:hover  { background: var(--pale); }
+.qty-btn:active { background: #b6ddf7; }
+.qty-num {
+  flex: 1; text-align: center;
+  font-size: 18px; font-weight: 700; color: var(--navy);
+  border: none;
+  border-left: 1.5px solid var(--border);
+  border-right: 1.5px solid var(--border);
+  outline: none; padding: 8px 0;
+  font-family: 'Inter', sans-serif; background: #fff;
+}
+.qty-num::-webkit-outer-spin-button,
+.qty-num::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* ── Print button ── */
+.print-btn {
+  width: 100%; margin-top: 10px; padding: 13px 20px;
+  background: var(--navy); color: #fff; border: none; border-radius: 6px;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  box-shadow: 0 2px 8px rgba(15,35,140,.22);
+  transition: background .18s, transform .1s, box-shadow .18s;
+  position: relative; overflow: hidden;
+}
+.print-btn::after {
+  content: ''; position: absolute; left: 0; bottom: 0;
+  width: 100%; height: 3px; background: var(--yellow);
+  transform: scaleX(0); transform-origin: left; transition: transform .25s;
+}
+.print-btn:hover { background: var(--navy-h); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(15,35,140,.3); }
+.print-btn:hover::after { transform: scaleX(1); }
+.print-btn:active { transform: translateY(0); }
+.print-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── Preview card ── */
+.prev-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 1px 4px rgba(15,35,140,.05), 0 4px 18px rgba(15,35,140,.05);
+  display: flex; flex-direction: column;
+}
+.prev-card .card-title { color: var(--blue); border-bottom-color: var(--blue); }
+.prev-bg {
+  background: #e6eaf4;
+  background-image: radial-gradient(circle, #c8cfdf 1px, transparent 1px);
+  background-size: 12px 12px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 240px; padding: 28px;
+}
+
+/* ────────────────────────────────────────
+   LABEL — screen preview
+   Physical size: 62mm × 29mm
+   At 96 dpi: 62mm ≈ 234px, 29mm ≈ 110px
+   We scale 2× via CSS transform for readability.
+   The extra margin compensates for the scale overflow.
+──────────────────────────────────────── */
+.label {
+  width: 234px;
+  height: 110px;
+  transform: scale(2);
+  transform-origin: center center;
+  margin: 55px 0;   /* compensate scale overflow */
+  background: #fff;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.14), 0 8px 28px rgba(15,35,140,.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.lbl-stripe {
+  height: 5px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--navy) 0%, var(--blue) 65%, var(--yellow) 100%);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.lbl-body {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 4px 7px 3px; gap: 0; min-height: 0;
+}
+
+/* Date row and Time row — each takes exactly half the body height */
+.lbl-row {
+  flex: 1; display: flex; flex-direction: row;
+  align-items: center; gap: 4px;
+  min-height: 0; overflow: hidden;
+}
+
+.lbl-sep { height: 0.5px; background: #d4daea; margin: 0 4px; flex-shrink: 0; }
+
+.lbl-tag {
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 5.5px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--navy);
+  width: 22px; flex-shrink: 0; line-height: 1;
+  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+}
+
+.lbl-bc-wrap {
+  flex: 1; display: flex; align-items: center;
+  justify-content: flex-start; min-width: 0;
+  height: 100%; overflow: hidden;
+}
+
+/*
+  KEY FIX: Both SVGs get IDENTICAL fixed CSS dimensions.
+  JsBarcode sets its own width/height attrs — we strip them and
+  use only the viewBox so the SVG scales to our fixed container.
+*/
+.lbl-bc-wrap svg {
+  width: 152px !important;
+  height: 38px !important;
+  display: block; flex-shrink: 0;
+}
+
+.lbl-val {
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 5.5px; font-weight: 600; color: #1a1a2e;
+  letter-spacing: 0.3px; width: 40px;
+  text-align: right; flex-shrink: 0; line-height: 1;
+}
+
+.lbl-stamp {
+  position: absolute; bottom: 2px; right: 5px;
+  display: flex; align-items: center; gap: 1px;
+}
+.lbl-stamp-dot {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--yellow);
+  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+}
+.lbl-stamp-txt {
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 4px; font-weight: 800; letter-spacing: 1px;
+  color: var(--navy); opacity: 0.5;
+  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+}
+
+.info-row {
+  margin-top: 16px; display: flex;
+  justify-content: space-between;
+  font-size: 11px; color: var(--muted);
+}
+.info-row strong { color: var(--navy); }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 26px; left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--navy); color: #fff;
+  padding: 11px 20px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 9px;
+  box-shadow: 0 4px 20px rgba(15,35,140,.35);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999; border-bottom: 3px solid var(--yellow);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─────────────────────────────
+   PRINT AREA (hidden on screen)
+───────────────────────────── */
+#print-area { display: none; }
+
+/* ─────────────────────────────
+   PRINT STYLESHEET
+   @page forces 62×29mm per label.
+   Each .pl is exactly one label page.
+───────────────────────────── */
+@media print {
+  @page { margin: 0; size: 62mm 29mm; }
+
+  html, body { margin: 0; padding: 0; width: 62mm; background: #fff; }
+
+  body > *:not(#print-area) { display: none !important; }
+  #print-area { display: block !important; }
+
+  #print-area .pl {
+    width: 62mm; height: 29mm;
+    display: flex; flex-direction: column;
+    overflow: hidden; position: relative; background: #fff;
+    page-break-after: always; page-break-inside: avoid;
+  }
+  #print-area .pl:last-child { page-break-after: auto; }
+
+  #print-area .pl-stripe {
+    height: 2.5pt; flex-shrink: 0;
+    background: linear-gradient(90deg,#0F238C 0%,#1297E4 65%,#EAE136 100%) !important;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+
+  #print-area .pl-body {
+    flex: 1; display: flex; flex-direction: column;
+    padding: 1.2mm 2mm 0.8mm; gap: 0; min-height: 0;
+  }
+
+  #print-area .pl-row {
+    flex: 1; display: flex; flex-direction: row;
+    align-items: center; gap: 1.5mm;
+    min-height: 0; overflow: hidden;
+  }
+
+  #print-area .pl-sep {
+    height: 0.15mm; background: #d4daea;
+    margin: 0 1.5mm; flex-shrink: 0;
+  }
+
+  #print-area .pl-tag {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 5pt; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase; color: #0F238C;
+    width: 6mm; flex-shrink: 0; line-height: 1;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+
+  #print-area .pl-bc {
+    flex: 1; display: flex; align-items: center;
+    min-width: 0; height: 100%; overflow: hidden;
+  }
+
+  /* Both barcodes IDENTICAL dimensions in print */
+  #print-area .pl-bc svg {
+    width: 40mm !important;
+    height: 10mm !important;
+    display: block;
+  }
+
+  #print-area .pl-val {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 5pt; font-weight: 600; color: #1a1a2e;
+    letter-spacing: 0.3px; width: 13mm;
+    text-align: right; flex-shrink: 0; line-height: 1;
+  }
+
+  #print-area .pl-stamp {
+    position: absolute; bottom: 1mm; right: 2mm;
+    display: flex; align-items: center; gap: 0.5mm;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  #print-area .pl-dot {
+    width: 1.2mm; height: 1.2mm; border-radius: 50%;
+    background: #EAE136;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  #print-area .pl-txt {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 4pt; font-weight: 800; letter-spacing: 1px;
+    color: #0F238C; opacity: 0.5;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+}
+
+@media (max-width: 760px) {
+  .main { grid-template-columns: 1fr; }
+  .label { transform: scale(1.5); margin: 28px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-logo">A<span>S</span>ML</div>
+    <div class="hdr-pill">Label Printer</div>
+  </div>
+  <div class="hdr-right">Receiving &amp; Logistics</div>
+</div>
+<div class="grad-bar"></div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- Left: Controls -->
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="2" y="2" width="12" height="12" rx="1.5"/>
+        <line x1="5" y1="7" x2="5" y2="11"/>
+        <line x1="8" y1="5" x2="8" y2="11"/>
+        <line x1="11" y1="8" x2="11" y2="11"/>
+      </svg>
+      Configure Label
+    </div>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="inp-date">
+    </div>
+
+    <div class="field">
+      <label>Time</label>
+      <input type="time" id="inp-time">
+    </div>
+
+    <div class="field">
+      <label>Number of Copies</label>
+      <div class="qty-wrap">
+        <button class="qty-btn" id="btn-minus" aria-label="Decrease">−</button>
+        <input type="number" class="qty-num" id="inp-qty" value="1" min="1" max="99">
+        <button class="qty-btn" id="btn-plus" aria-label="Increase">+</button>
+      </div>
+    </div>
+
+    <button class="print-btn" id="btn-print">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4,6 4,1 12,1 12,6"/>
+        <path d="M4 11H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2"/>
+        <rect x="4" y="10" width="8" height="5"/>
+      </svg>
+      Print Labels
+    </button>
+  </div>
+
+  <!-- Right: Preview -->
+  <div class="prev-card">
+    <div class="card-title">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="1" y="1" width="14" height="14" rx="2"/>
+        <line x1="4" y1="6" x2="12" y2="6"/>
+        <line x1="4" y1="10" x2="10" y2="10"/>
+      </svg>
+      Live Preview · 62 × 29 mm
+    </div>
+
+    <div class="prev-bg">
+      <div class="label" id="prev-label">
+        <div class="lbl-stripe"></div>
+        <div class="lbl-body">
+
+          <div class="lbl-row">
+            <div class="lbl-tag">Date</div>
+            <div class="lbl-bc-wrap"><svg id="bc-date-prev"></svg></div>
+            <div class="lbl-val" id="val-date">—</div>
+          </div>
+
+          <div class="lbl-sep"></div>
+
+          <div class="lbl-row">
+            <div class="lbl-tag">Time</div>
+            <div class="lbl-bc-wrap"><svg id="bc-time-prev"></svg></div>
+            <div class="lbl-val" id="val-time">—</div>
+          </div>
+
+        </div>
+        <div class="lbl-stamp">
+          <div class="lbl-stamp-dot"></div>
+          <div class="lbl-stamp-txt">ASML</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-row">
+      <span>Barcode: <strong>DDMMYYYY</strong> / <strong>HHMM</strong></span>
+      <span id="info-copies">Copies: <strong>1</strong></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Print DOM — built by JS before print() -->
+<div id="print-area"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✓</span>
+  <span id="toast-msg">Sent to printer</span>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ── Helpers ── */
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function nowHHMM() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/* ── Set current datetime as default ── */
+$('inp-date').value = todayISO();
+$('inp-time').value = nowHHMM();
+
+/* ── Format functions ── */
+// "YYYY-MM-DD" → barcode "DDMMYYYY"
+function bcDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}${m}${y}`;
+}
+// "YYYY-MM-DD" → display "DD.MM.YYYY"
+function dispDate(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+// "HH:MM" → barcode "HHMM"
+function bcTime(t) {
+  return t ? t.replace(':', '') : '';
+}
+// "HH:MM" → display "HH:MM"
+function dispTime(t) { return t || '—'; }
+
+/* ── Barcode config ──
+   width & height are fixed and IDENTICAL for both barcodes.
+   This guarantees equal rendered bar dimensions regardless of data length.
+   JsBarcode's width param = individual bar width in px (not total SVG width).
+   We additionally strip the generated width/height attrs and rely on
+   our CSS-fixed container to size both SVGs identically.
+*/
+const BC = {
+  format: 'CODE128',
+  width: 1.8,        // bar pixel width — same for date & time
+  height: 36,        // bar height in px — same for date & time
+  displayValue: false,
+  margin: 2,
+  lineColor: '#0d1a3a',
+  background: '#ffffff',
+};
+
+function renderBC(svgEl, value) {
+  if (!value) { svgEl.innerHTML = ''; return; }
+  try {
+    JsBarcode(svgEl, value, BC);
+    // Strip JsBarcode's auto-calculated width/height attrs so our CSS takes over
+    svgEl.removeAttribute('width');
+    svgEl.removeAttribute('height');
+    // viewBox stays — this allows the SVG to scale correctly inside the fixed container
+  } catch(e) { svgEl.innerHTML = ''; }
+}
+
+/* ── Refresh preview ── */
+function refresh() {
+  const dateISO = $('inp-date').value;
+  const timeStr = $('inp-time').value;
+  const qty     = clampQty();
+
+  // Use placeholder values so preview always shows something meaningful
+  renderBC($('bc-date-prev'), bcDate(dateISO) || '01012025');
+  renderBC($('bc-time-prev'), bcTime(timeStr) || '0800');
+
+  $('val-date').textContent = dispDate(dateISO);
+  $('val-time').textContent = dispTime(timeStr);
+  $('info-copies').innerHTML = `Copies: <strong>${qty}</strong>`;
+}
+
+function clampQty() {
+  const v = Math.max(1, Math.min(99, parseInt($('inp-qty').value) || 1));
+  $('inp-qty').value = v;
+  return v;
+}
+
+/* ── Quantity buttons ── */
+$('btn-minus').addEventListener('click', () => {
+  const v = parseInt($('inp-qty').value) || 1;
+  if (v > 1) { $('inp-qty').value = v - 1; refresh(); }
+});
+$('btn-plus').addEventListener('click', () => {
+  const v = parseInt($('inp-qty').value) || 1;
+  if (v < 99) { $('inp-qty').value = v + 1; refresh(); }
+});
+
+['input', 'change'].forEach(ev => {
+  $('inp-date').addEventListener(ev, refresh);
+  $('inp-time').addEventListener(ev, refresh);
+  $('inp-qty').addEventListener(ev, refresh);
+});
+
+/* ── Build print DOM ── */
+function buildPrintArea() {
+  const dateISO = $('inp-date').value;
+  const timeStr = $('inp-time').value;
+  const qty     = clampQty();
+  const bcd     = bcDate(dateISO);
+  const bct     = bcTime(timeStr);
+  const dd      = dispDate(dateISO);
+  const dt      = dispTime(timeStr);
+
+  const area = $('print-area');
+  area.innerHTML = '';
+
+  for (let i = 0; i < qty; i++) {
+    const el = document.createElement('div');
+    el.className = 'pl';
+    el.innerHTML = `
+      <div class="pl-stripe"></div>
+      <div class="pl-body">
+        <div class="pl-row">
+          <div class="pl-tag">Date</div>
+          <div class="pl-bc"><svg id="pbc-d-${i}"></svg></div>
+          <div class="pl-val">${dd}</div>
+        </div>
+        <div class="pl-sep"></div>
+        <div class="pl-row">
+          <div class="pl-tag">Time</div>
+          <div class="pl-bc"><svg id="pbc-t-${i}"></svg></div>
+          <div class="pl-val">${dt}</div>
+        </div>
+      </div>
+      <div class="pl-stamp">
+        <div class="pl-dot"></div>
+        <div class="pl-txt">ASML</div>
+      </div>
+    `;
+    area.appendChild(el);
+    if (bcd) renderBC(el.querySelector(`#pbc-d-${i}`), bcd);
+    if (bct) renderBC(el.querySelector(`#pbc-t-${i}`), bct);
+  }
+}
+
+/* ── Toast ── */
+function toast(msg, ok = true) {
+  $('toast-icon').textContent = ok ? '✓' : '⚠';
+  $('toast-msg').textContent  = msg;
+  const el = $('toast');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ── Print ── */
+$('btn-print').addEventListener('click', () => {
+  if (!$('inp-date').value || !$('inp-time').value) {
+    toast('Please fill in date and time first', false);
+    return;
+  }
+  const qty = clampQty();
+  buildPrintArea();
+  // Delay so SVGs are fully rendered before the print dialog opens
+  setTimeout(() => {
+    window.print();
+    toast(`${qty} label${qty > 1 ? 's' : ''} sent to printer`);
+  }, 150);
+});
+
+// Clean up after printing to keep DOM tidy
+window.addEventListener('afterprint', () => {
+  $('print-area').innerHTML = '';
+});
+
+/* ── Init ── */
+refresh();
+</script>
+</body>
+</html>

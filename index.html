@@ -7,6 +7,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ════════════════════════════════
+   LABEL SIZE: 50mm × 25mm
+   • Wide enough for reliable CODE128 scanning
+   • Short enough to fit on small parts / boxes
+   • Matches Brother DK-22223 continuous roll (62mm wide, cut to 25mm height)
+     or any generic 50×25mm thermal label
+   The @page rule below tells the browser to use exactly this size,
+   so Chrome/Edge will pre-select it in the print dialog.
+════════════════════════════════ */
+
 :root {
   --navy:    #0F238C;
   --navy-h:  #142fa8;
@@ -17,7 +27,12 @@
   --text:    #0d1a3a;
   --muted:   #5a6a8a;
   --pale:    #daeef9;
+
+  /* Physical label — change ONLY these two to resize everything */
+  --LW: 50mm;
+  --LH: 25mm;
 }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -34,14 +49,15 @@ body {
 .hdr {
   width: 100%;
   background: var(--navy);
-  height: 58px;
+  height: 56px;
   padding: 0 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 2px 16px rgba(15,35,140,.3);
+  flex-shrink: 0;
 }
-.hdr-left { display: flex; align-items: center; gap: 14px; }
+.hdr-left  { display: flex; align-items: center; gap: 14px; }
 .hdr-logo  { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; line-height: 1; }
 .hdr-logo span { color: var(--yellow); }
 .hdr-pill  {
@@ -58,13 +74,38 @@ body {
   background: linear-gradient(90deg, var(--yellow), var(--blue) 55%, var(--navy));
 }
 
+/* ── Print tip banner ── */
+.tip-bar {
+  width: 100%;
+  background: #fffbe6;
+  border-bottom: 1px solid #f0e07a;
+  padding: 9px 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #5a4800;
+}
+.tip-bar svg { width: 15px; height: 15px; flex-shrink: 0; color: #b38a00; }
+.tip-bar strong { color: #3a2f00; }
+.tip-bar .tip-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #b38a00;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+}
+
 /* ── Layout ── */
 .main {
-  width: 100%; max-width: 980px;
-  padding: 32px 24px 64px;
+  width: 100%; max-width: 960px;
+  padding: 28px 24px 64px;
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 22px;
+  grid-template-columns: 330px 1fr;
+  gap: 20px;
   align-items: start;
 }
 
@@ -73,24 +114,24 @@ body {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 26px;
+  padding: 24px;
   box-shadow: 0 1px 4px rgba(15,35,140,.05), 0 4px 18px rgba(15,35,140,.05);
 }
 .card-title {
   font-size: 10px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; color: var(--navy);
   border-bottom: 2px solid var(--yellow);
-  padding-bottom: 10px; margin-bottom: 22px;
+  padding-bottom: 9px; margin-bottom: 20px;
   display: flex; align-items: center; gap: 7px;
 }
 .card-title svg { width: 13px; height: 13px; flex-shrink: 0; }
 
 /* ── Fields ── */
-.field { margin-bottom: 16px; }
+.field { margin-bottom: 14px; }
 .field label {
   display: block; font-size: 10px; font-weight: 600;
   letter-spacing: 1px; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 6px;
+  color: var(--muted); margin-bottom: 5px;
 }
 .field input[type="date"],
 .field input[type="time"] {
@@ -157,10 +198,36 @@ body {
 .print-btn:active { transform: translateY(0); }
 .print-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 
+/* ── Size selector ── */
+.size-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.size-btn {
+  flex: 1; min-width: 70px;
+  padding: 7px 4px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s, color .15s, background .15s;
+  line-height: 1.3;
+}
+.size-btn span { display: block; font-size: 8px; font-weight: 400; margin-top: 1px; color: #aaa; }
+.size-btn.active {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+}
+.size-btn.active span { color: rgba(255,255,255,.6); }
+
 /* ── Preview card ── */
 .prev-card {
   background: #fff; border: 1px solid var(--border); border-radius: 14px;
-  padding: 26px;
+  padding: 24px;
   box-shadow: 0 1px 4px rgba(15,35,140,.05), 0 4px 18px rgba(15,35,140,.05);
   display: flex; flex-direction: column;
 }
@@ -171,22 +238,23 @@ body {
   background-size: 12px 12px;
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  min-height: 240px; padding: 28px;
+  min-height: 220px; padding: 28px;
 }
 
-/* ────────────────────────────────────────
-   LABEL — screen preview
-   Physical size: 62mm × 29mm
-   At 96 dpi: 62mm ≈ 234px, 29mm ≈ 110px
-   We scale 2× via CSS transform for readability.
-   The extra margin compensates for the scale overflow.
-──────────────────────────────────────── */
+/* ────────────────────────────────────────────
+   SCREEN LABEL PREVIEW
+   Physical: 50mm × 25mm
+   At 96dpi: 50mm ≈ 189px, 25mm ≈ 95px
+   Scale 2.2× for readability on screen.
+   margin compensates the scale overflow.
+──────────────────────────────────────────── */
 .label {
-  width: 234px;
-  height: 110px;
-  transform: scale(2);
+  /* base px at 96dpi */
+  width: 189px;
+  height: 95px;
+  transform: scale(2.2);
   transform-origin: center center;
-  margin: 55px 0;   /* compensate scale overflow */
+  margin: 52px 0;
   background: #fff;
   border-radius: 3px;
   box-shadow: 0 2px 8px rgba(0,0,0,.14), 0 8px 28px rgba(15,35,140,.18);
@@ -194,80 +262,73 @@ body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  transition: width .2s, height .2s;
 }
 
 .lbl-stripe {
-  height: 5px; flex-shrink: 0;
+  height: 4px; flex-shrink: 0;
   background: linear-gradient(90deg, var(--navy) 0%, var(--blue) 65%, var(--yellow) 100%);
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact; -webkit-print-color-adjust: exact;
 }
 
 .lbl-body {
   flex: 1; display: flex; flex-direction: column;
-  padding: 4px 7px 3px; gap: 0; min-height: 0;
+  padding: 3px 6px 2px; gap: 0; min-height: 0;
 }
 
-/* Date row and Time row — each takes exactly half the body height */
 .lbl-row {
   flex: 1; display: flex; flex-direction: row;
-  align-items: center; gap: 4px;
+  align-items: center; gap: 3px;
   min-height: 0; overflow: hidden;
 }
 
-.lbl-sep { height: 0.5px; background: #d4daea; margin: 0 4px; flex-shrink: 0; }
+.lbl-sep { height: 0.5px; background: #d4daea; margin: 0 3px; flex-shrink: 0; }
 
 .lbl-tag {
   font-family: 'Inter', Arial, sans-serif;
-  font-size: 5.5px; font-weight: 700; letter-spacing: 0.8px;
+  font-size: 5px; font-weight: 700; letter-spacing: 0.7px;
   text-transform: uppercase; color: var(--navy);
-  width: 22px; flex-shrink: 0; line-height: 1;
+  width: 18px; flex-shrink: 0; line-height: 1;
   print-color-adjust: exact; -webkit-print-color-adjust: exact;
 }
 
 .lbl-bc-wrap {
   flex: 1; display: flex; align-items: center;
-  justify-content: flex-start; min-width: 0;
-  height: 100%; overflow: hidden;
+  min-width: 0; height: 100%; overflow: hidden;
 }
 
-/*
-  KEY FIX: Both SVGs get IDENTICAL fixed CSS dimensions.
-  JsBarcode sets its own width/height attrs — we strip them and
-  use only the viewBox so the SVG scales to our fixed container.
-*/
+/* Both SVGs: identical fixed size — the key to equal-looking barcodes */
 .lbl-bc-wrap svg {
-  width: 152px !important;
-  height: 38px !important;
+  width: 130px !important;
+  height: 34px !important;
   display: block; flex-shrink: 0;
 }
 
 .lbl-val {
   font-family: 'Inter', Arial, sans-serif;
-  font-size: 5.5px; font-weight: 600; color: #1a1a2e;
-  letter-spacing: 0.3px; width: 40px;
+  font-size: 5px; font-weight: 600; color: #1a1a2e;
+  letter-spacing: 0.2px; width: 34px;
   text-align: right; flex-shrink: 0; line-height: 1;
 }
 
 .lbl-stamp {
-  position: absolute; bottom: 2px; right: 5px;
+  position: absolute; bottom: 1.5px; right: 4px;
   display: flex; align-items: center; gap: 1px;
 }
 .lbl-stamp-dot {
-  width: 3px; height: 3px; border-radius: 50%;
+  width: 2.5px; height: 2.5px; border-radius: 50%;
   background: var(--yellow);
   print-color-adjust: exact; -webkit-print-color-adjust: exact;
 }
 .lbl-stamp-txt {
   font-family: 'Inter', Arial, sans-serif;
-  font-size: 4px; font-weight: 800; letter-spacing: 1px;
-  color: var(--navy); opacity: 0.5;
-  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  font-size: 3.5px; font-weight: 800; letter-spacing: 1px;
+  color: var(--navy); opacity: 0.45;
 }
 
 .info-row {
-  margin-top: 16px; display: flex;
-  justify-content: space-between;
+  margin-top: 14px; display: flex;
+  justify-content: space-between; align-items: center;
   font-size: 11px; color: var(--muted);
 }
 .info-row strong { color: var(--navy); }
@@ -287,59 +348,64 @@ body {
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ─────────────────────────────
-   PRINT AREA (hidden on screen)
-───────────────────────────── */
+/* ── Print area ── */
 #print-area { display: none; }
 
-/* ─────────────────────────────
+/* ════════════════════════════════════════════════
    PRINT STYLESHEET
-   @page forces 62×29mm per label.
-   Each .pl is exactly one label page.
-───────────────────────────── */
+   @page size MUST match the physical label exactly.
+   Chrome/Edge will pre-fill the paper size in the
+   print dialog — user just needs to confirm.
+   Set margins to 0 so content fills the label edge-to-edge.
+════════════════════════════════════════════════ */
 @media print {
-  @page { margin: 0; size: 62mm 29mm; }
+  /* --- Default: 50×25mm --- */
+  @page { margin: 0; size: 50mm 25mm; }
 
-  html, body { margin: 0; padding: 0; width: 62mm; background: #fff; }
+  html, body { margin: 0; padding: 0; width: 50mm; background: #fff; }
 
   body > *:not(#print-area) { display: none !important; }
   #print-area { display: block !important; }
 
   #print-area .pl {
-    width: 62mm; height: 29mm;
     display: flex; flex-direction: column;
     overflow: hidden; position: relative; background: #fff;
     page-break-after: always; page-break-inside: avoid;
   }
   #print-area .pl:last-child { page-break-after: auto; }
 
+  /* Size variants — JS adds class to #print-area */
+  #print-area.sz-50x25 .pl { width: 50mm; height: 25mm; }
+  #print-area.sz-62x29 .pl { width: 62mm; height: 29mm; }
+  #print-area.sz-38x19 .pl { width: 38mm; height: 19mm; }
+
   #print-area .pl-stripe {
-    height: 2.5pt; flex-shrink: 0;
+    height: 2pt; flex-shrink: 0;
     background: linear-gradient(90deg,#0F238C 0%,#1297E4 65%,#EAE136 100%) !important;
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
 
   #print-area .pl-body {
     flex: 1; display: flex; flex-direction: column;
-    padding: 1.2mm 2mm 0.8mm; gap: 0; min-height: 0;
+    padding: 1mm 1.8mm 0.8mm; gap: 0; min-height: 0;
   }
 
   #print-area .pl-row {
     flex: 1; display: flex; flex-direction: row;
-    align-items: center; gap: 1.5mm;
+    align-items: center; gap: 1.2mm;
     min-height: 0; overflow: hidden;
   }
 
   #print-area .pl-sep {
     height: 0.15mm; background: #d4daea;
-    margin: 0 1.5mm; flex-shrink: 0;
+    margin: 0 1mm; flex-shrink: 0;
   }
 
   #print-area .pl-tag {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 5pt; font-weight: 700; letter-spacing: 0.6px;
+    font-size: 4.5pt; font-weight: 700; letter-spacing: 0.5px;
     text-transform: uppercase; color: #0F238C;
-    width: 6mm; flex-shrink: 0; line-height: 1;
+    width: 5mm; flex-shrink: 0; line-height: 1;
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
 
@@ -348,34 +414,34 @@ body {
     min-width: 0; height: 100%; overflow: hidden;
   }
 
-  /* Both barcodes IDENTICAL dimensions in print */
+  /* Identical barcode dimensions in print */
   #print-area .pl-bc svg {
-    width: 40mm !important;
-    height: 10mm !important;
+    width: 31mm !important;
+    height: 8mm !important;
     display: block;
   }
 
   #print-area .pl-val {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 5pt; font-weight: 600; color: #1a1a2e;
-    letter-spacing: 0.3px; width: 13mm;
+    font-size: 4.5pt; font-weight: 600; color: #1a1a2e;
+    letter-spacing: 0.2px; width: 11mm;
     text-align: right; flex-shrink: 0; line-height: 1;
   }
 
   #print-area .pl-stamp {
-    position: absolute; bottom: 1mm; right: 2mm;
-    display: flex; align-items: center; gap: 0.5mm;
+    position: absolute; bottom: 0.8mm; right: 1.5mm;
+    display: flex; align-items: center; gap: 0.4mm;
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   #print-area .pl-dot {
-    width: 1.2mm; height: 1.2mm; border-radius: 50%;
+    width: 1mm; height: 1mm; border-radius: 50%;
     background: #EAE136;
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   #print-area .pl-txt {
     font-family: 'Inter', Arial, sans-serif;
-    font-size: 4pt; font-weight: 800; letter-spacing: 1px;
-    color: #0F238C; opacity: 0.5;
+    font-size: 3.5pt; font-weight: 800; letter-spacing: 1px;
+    color: #0F238C; opacity: 0.45;
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
 }
@@ -388,7 +454,7 @@ body {
 </head>
 <body>
 
-<!-- ── Header ── -->
+<!-- Header -->
 <div class="hdr">
   <div class="hdr-left">
     <div class="hdr-logo">A<span>S</span>ML</div>
@@ -398,7 +464,21 @@ body {
 </div>
 <div class="grad-bar"></div>
 
-<!-- ── Main ── -->
+<!-- Print tip banner -->
+<div class="tip-bar" id="tip-bar">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <circle cx="8" cy="8" r="7"/><line x1="8" y1="7" x2="8" y2="11"/><circle cx="8" cy="5" r=".5" fill="currentColor" stroke="none"/>
+  </svg>
+  <span>
+    <strong>First-time setup:</strong>
+    In the print dialog → <strong>More settings</strong> → Paper size: <strong>Custom</strong> →
+    set <strong>50 × 25 mm</strong> · Margins: <strong>None</strong> · Scale: <strong>100%</strong>.
+    Browser will remember this for next time.
+  </span>
+  <button class="tip-close" onclick="document.getElementById('tip-bar').style.display='none'" aria-label="Dismiss">×</button>
+</div>
+
+<!-- Main -->
 <div class="main">
 
   <!-- Left: Controls -->
@@ -421,6 +501,21 @@ body {
     <div class="field">
       <label>Time</label>
       <input type="time" id="inp-time">
+    </div>
+
+    <div class="field">
+      <label>Label Size</label>
+      <div class="size-row">
+        <button class="size-btn active" data-w="50" data-h="25" data-pw="189" data-ph="95" data-scale="2.2" data-margin="52">
+          50 × 25 mm<span>Recommended</span>
+        </button>
+        <button class="size-btn" data-w="62" data-h="29" data-pw="234" data-ph="110" data-scale="2.0" data-margin="55">
+          62 × 29 mm<span>Brother DK</span>
+        </button>
+        <button class="size-btn" data-w="38" data-h="19" data-pw="144" data-ph="72" data-scale="2.4" data-margin="46">
+          38 × 19 mm<span>Compact</span>
+        </button>
+      </div>
     </div>
 
     <div class="field">
@@ -450,28 +545,24 @@ body {
         <line x1="4" y1="6" x2="12" y2="6"/>
         <line x1="4" y1="10" x2="10" y2="10"/>
       </svg>
-      Live Preview · 62 × 29 mm
+      Live Preview
     </div>
 
     <div class="prev-bg">
       <div class="label" id="prev-label">
         <div class="lbl-stripe"></div>
         <div class="lbl-body">
-
           <div class="lbl-row">
             <div class="lbl-tag">Date</div>
             <div class="lbl-bc-wrap"><svg id="bc-date-prev"></svg></div>
             <div class="lbl-val" id="val-date">—</div>
           </div>
-
           <div class="lbl-sep"></div>
-
           <div class="lbl-row">
             <div class="lbl-tag">Time</div>
             <div class="lbl-bc-wrap"><svg id="bc-time-prev"></svg></div>
             <div class="lbl-val" id="val-time">—</div>
           </div>
-
         </div>
         <div class="lbl-stamp">
           <div class="lbl-stamp-dot"></div>
@@ -481,17 +572,15 @@ body {
     </div>
 
     <div class="info-row">
-      <span>Barcode: <strong>DDMMYYYY</strong> / <strong>HHMM</strong></span>
+      <span>Barcode: <strong>DDMMYYYY</strong> / <strong>HHMM</strong> &nbsp;·&nbsp; Size: <strong id="size-label">50 × 25 mm</strong></span>
       <span id="info-copies">Copies: <strong>1</strong></span>
     </div>
   </div>
 
 </div>
 
-<!-- Print DOM — built by JS before print() -->
 <div id="print-area"></div>
 
-<!-- Toast -->
 <div class="toast" id="toast">
   <span id="toast-icon">✓</span>
   <span id="toast-msg">Sent to printer</span>
@@ -502,7 +591,6 @@ const $ = id => document.getElementById(id);
 
 /* ── Helpers ── */
 function pad(n) { return String(n).padStart(2, '0'); }
-
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -512,41 +600,29 @@ function nowHHMM() {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/* ── Set current datetime as default ── */
+/* ── Default to current date/time ── */
 $('inp-date').value = todayISO();
 $('inp-time').value = nowHHMM();
 
 /* ── Format functions ── */
-// "YYYY-MM-DD" → barcode "DDMMYYYY"
-function bcDate(iso) {
+function bcDate(iso) {                    // "YYYY-MM-DD" → "DDMMYYYY"
   if (!iso) return '';
   const [y, m, d] = iso.split('-');
   return `${d}${m}${y}`;
 }
-// "YYYY-MM-DD" → display "DD.MM.YYYY"
-function dispDate(iso) {
+function dispDate(iso) {                  // "YYYY-MM-DD" → "DD.MM.YYYY"
   if (!iso) return '—';
   const [y, m, d] = iso.split('-');
   return `${d}.${m}.${y}`;
 }
-// "HH:MM" → barcode "HHMM"
-function bcTime(t) {
-  return t ? t.replace(':', '') : '';
-}
-// "HH:MM" → display "HH:MM"
+function bcTime(t)   { return t ? t.replace(':', '') : ''; }  // "HH:MM" → "HHMM"
 function dispTime(t) { return t || '—'; }
 
-/* ── Barcode config ──
-   width & height are fixed and IDENTICAL for both barcodes.
-   This guarantees equal rendered bar dimensions regardless of data length.
-   JsBarcode's width param = individual bar width in px (not total SVG width).
-   We additionally strip the generated width/height attrs and rely on
-   our CSS-fixed container to size both SVGs identically.
-*/
+/* ── Barcode config ── */
 const BC = {
   format: 'CODE128',
-  width: 1.8,        // bar pixel width — same for date & time
-  height: 36,        // bar height in px — same for date & time
+  width: 1.6,          // bar pixel width — fixed, same for both barcodes
+  height: 32,          // bar height — fixed, same for both barcodes
   displayValue: false,
   margin: 2,
   lineColor: '#0d1a3a',
@@ -557,35 +633,76 @@ function renderBC(svgEl, value) {
   if (!value) { svgEl.innerHTML = ''; return; }
   try {
     JsBarcode(svgEl, value, BC);
-    // Strip JsBarcode's auto-calculated width/height attrs so our CSS takes over
-    svgEl.removeAttribute('width');
-    svgEl.removeAttribute('height');
-    // viewBox stays — this allows the SVG to scale correctly inside the fixed container
+    svgEl.removeAttribute('width');   // strip auto-width; CSS fixes the size
+    svgEl.removeAttribute('height');  // strip auto-height; viewBox handles scaling
   } catch(e) { svgEl.innerHTML = ''; }
 }
 
-/* ── Refresh preview ── */
-function refresh() {
-  const dateISO = $('inp-date').value;
-  const timeStr = $('inp-time').value;
-  const qty     = clampQty();
+/* ── Active size state ── */
+let activeSize = { w: 50, h: 25, pw: 189, ph: 95, scale: 2.2, margin: 52 };
 
-  // Use placeholder values so preview always shows something meaningful
-  renderBC($('bc-date-prev'), bcDate(dateISO) || '01012025');
-  renderBC($('bc-time-prev'), bcTime(timeStr) || '0800');
+/* ── Size selector ── */
+const sizeBtns = document.querySelectorAll('.size-btn');
+sizeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    sizeBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 
-  $('val-date').textContent = dispDate(dateISO);
-  $('val-time').textContent = dispTime(timeStr);
-  $('info-copies').innerHTML = `Copies: <strong>${qty}</strong>`;
+    activeSize = {
+      w:      parseInt(btn.dataset.w),
+      h:      parseInt(btn.dataset.h),
+      pw:     parseInt(btn.dataset.pw),
+      ph:     parseInt(btn.dataset.ph),
+      scale:  parseFloat(btn.dataset.scale),
+      margin: parseInt(btn.dataset.margin),
+    };
+
+    // Update preview label dimensions & scale
+    const lbl = $('prev-label');
+    lbl.style.width  = activeSize.pw + 'px';
+    lbl.style.height = activeSize.ph + 'px';
+    lbl.style.transform = `scale(${activeSize.scale})`;
+    lbl.style.marginTop    = activeSize.margin + 'px';
+    lbl.style.marginBottom = activeSize.margin + 'px';
+
+    // Update @page size dynamically by injecting a <style>
+    updatePageStyle();
+
+    $('size-label').textContent = `${activeSize.w} × ${activeSize.h} mm`;
+
+    // Update tip text
+    const tipSpan = document.querySelector('.tip-bar span');
+    if (tipSpan) {
+      tipSpan.innerHTML = `<strong>Print setup:</strong> Paper size → <strong>Custom</strong> → <strong>${activeSize.w} × ${activeSize.h} mm</strong> · Margins: <strong>None</strong> · Scale: <strong>100%</strong>.`;
+    }
+
+    refresh();
+  });
+});
+
+/* ── Dynamic @page size ── */
+let pageStyleEl = null;
+function updatePageStyle() {
+  if (!pageStyleEl) {
+    pageStyleEl = document.createElement('style');
+    document.head.appendChild(pageStyleEl);
+  }
+  pageStyleEl.textContent = `
+    @media print {
+      @page { margin: 0; size: ${activeSize.w}mm ${activeSize.h}mm; }
+      html, body { width: ${activeSize.w}mm; }
+      #print-area .pl { width: ${activeSize.w}mm; height: ${activeSize.h}mm; }
+    }
+  `;
 }
+updatePageStyle(); // set default on load
 
+/* ── Qty ── */
 function clampQty() {
   const v = Math.max(1, Math.min(99, parseInt($('inp-qty').value) || 1));
   $('inp-qty').value = v;
   return v;
 }
-
-/* ── Quantity buttons ── */
 $('btn-minus').addEventListener('click', () => {
   const v = parseInt($('inp-qty').value) || 1;
   if (v > 1) { $('inp-qty').value = v - 1; refresh(); }
@@ -594,22 +711,35 @@ $('btn-plus').addEventListener('click', () => {
   const v = parseInt($('inp-qty').value) || 1;
   if (v < 99) { $('inp-qty').value = v + 1; refresh(); }
 });
-
-['input', 'change'].forEach(ev => {
+['input','change'].forEach(ev => {
   $('inp-date').addEventListener(ev, refresh);
   $('inp-time').addEventListener(ev, refresh);
   $('inp-qty').addEventListener(ev, refresh);
 });
 
+/* ── Refresh preview ── */
+function refresh() {
+  const dateISO = $('inp-date').value;
+  const timeStr = $('inp-time').value;
+  const qty = clampQty();
+
+  renderBC($('bc-date-prev'), bcDate(dateISO) || '01012025');
+  renderBC($('bc-time-prev'), bcTime(timeStr) || '0800');
+
+  $('val-date').textContent = dispDate(dateISO);
+  $('val-time').textContent = dispTime(timeStr);
+  $('info-copies').innerHTML = `Copies: <strong>${qty}</strong>`;
+}
+
 /* ── Build print DOM ── */
 function buildPrintArea() {
   const dateISO = $('inp-date').value;
   const timeStr = $('inp-time').value;
-  const qty     = clampQty();
-  const bcd     = bcDate(dateISO);
-  const bct     = bcTime(timeStr);
-  const dd      = dispDate(dateISO);
-  const dt      = dispTime(timeStr);
+  const qty = clampQty();
+  const bcd = bcDate(dateISO);
+  const bct = bcTime(timeStr);
+  const dd  = dispDate(dateISO);
+  const dt  = dispTime(timeStr);
 
   const area = $('print-area');
   area.innerHTML = '';
@@ -660,17 +790,13 @@ $('btn-print').addEventListener('click', () => {
   }
   const qty = clampQty();
   buildPrintArea();
-  // Delay so SVGs are fully rendered before the print dialog opens
   setTimeout(() => {
     window.print();
     toast(`${qty} label${qty > 1 ? 's' : ''} sent to printer`);
   }, 150);
 });
 
-// Clean up after printing to keep DOM tidy
-window.addEventListener('afterprint', () => {
-  $('print-area').innerHTML = '';
-});
+window.addEventListener('afterprint', () => { $('print-area').innerHTML = ''; });
 
 /* ── Init ── */
 refresh();
